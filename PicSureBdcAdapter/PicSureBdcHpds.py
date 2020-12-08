@@ -38,16 +38,21 @@ class ResourceConnection(HpdsResourceConnection):
                 harmonized = []
                 harmonized_yn = []
                 for key in ConsentsModifier.consent_paths["harmonized"]:
-                    harmonized = harmonized + qt["categoryFilters"][key]
+                    if key in qt["categoryFilters"]:
+                        harmonized = harmonized + qt["categoryFilters"][key]
                 harmonized = list(set(harmonized))
 
                 topmed = []
                 topmed_yn = []
                 for key in ConsentsModifier.consent_paths["topmed"]:
-                    topmed = topmed + qt["categoryFilters"][key]
+                    if key in qt["categoryFilters"]:
+                        topmed = topmed + qt["categoryFilters"][key]
                 topmed = list(set(topmed))
 
-                all_consents = list(set(harmonized + topmed + qt["categoryFilters"]["\\_consents\\"]))
+
+                all_consents = list(set(harmonized + topmed))
+                if ["\\_consents\\"] in qt["categoryFilters"]:
+                    all_consents = list(set(all_consents + qt["categoryFilters"]["\\_consents\\"]))
                 for key in all_consents:
                     if key in harmonized:
                         harmonized_yn.append("Y")
