@@ -23,11 +23,17 @@ class ConsentsModifier:
 
     @staticmethod
     def modify_query(query):
-        keys = query._lstFilter.data.keys()
+        keys = []
+        keys = keys + list(query._lstSelect.data.keys())
+        keys = keys + list(query._lstFilter.data.keys())
+        keys = keys + list(query._lstAnyOf.data.keys())
+        keys = keys + list(query._lstRequire.data.keys())
+        keys = keys + list(query._lstCrossCntFields.data.keys())
+        keys = list(set(keys))
         has_harmonized = False
         for path in ConsentsModifier.harmonizedPaths:
             for match in keys:
-                if path in match:
+                if match.find(path) != -1:
                     has_harmonized = True
                     break
         if not has_harmonized:
