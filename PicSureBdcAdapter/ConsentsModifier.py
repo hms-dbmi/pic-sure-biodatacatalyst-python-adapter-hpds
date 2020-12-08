@@ -8,18 +8,18 @@ class ConsentsModifier:
 
     @staticmethod
     def default_query_consents(query):
-        default_consents = {}
+        ConsentsModifier.default_consents = {}
         temp = {}
         for path in ConsentsModifier.consent_paths["harmonized"]:
             if path in query._lstFilter.data:
                 temp[path] = query._lstFilter.data[path]
-        default_consents["harmonized"] = temp
+        ConsentsModifier.default_consents["harmonized"] = temp
         temp = {}
         for path in ConsentsModifier.consent_paths["topmed"]:
             if path in query._lstFilter.data:
                 temp[path] = query._lstFilter.data[path]
-        default_consents["topmed"] = temp
-        return default_consents
+        ConsentsModifier.default_consents["topmed"] = temp
+        return ConsentsModifier.default_consents
 
     @staticmethod
     def modify_query(query):
