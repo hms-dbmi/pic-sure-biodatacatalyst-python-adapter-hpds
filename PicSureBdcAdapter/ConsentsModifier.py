@@ -1,4 +1,4 @@
-class QueryModifier:
+class ConsentsModifier:
     harmonizedPaths = ["\\DCC Harmonized data set"]
     consent_paths = {
         "harmonized": ["\\_harmonized_consent\\"],
@@ -10,12 +10,12 @@ class QueryModifier:
     def default_query_consents(query):
         default_consents = {}
         temp = {}
-        for path in QueryModifier.consent_paths["harmonized"]:
+        for path in ConsentsModifier.consent_paths["harmonized"]:
             if path in query._lstFilter.data:
                 temp[path] = query._lstFilter.data[path]
         default_consents["harmonized"] = temp
         temp = {}
-        for path in QueryModifier.consent_paths["topmed"]:
+        for path in ConsentsModifier.consent_paths["topmed"]:
             if path in query._lstFilter.data:
                 temp[path] = query._lstFilter.data[path]
         default_consents["topmed"] = temp
@@ -25,13 +25,13 @@ class QueryModifier:
     def modify_query(query):
         keys = query._lstFilter.data.keys()
         has_harmonized = False
-        for path in QueryModifier.harmonizedPaths:
+        for path in ConsentsModifier.harmonizedPaths:
             for match in keys:
                 if path in match:
                     has_harmonized = True
                     break
         if not has_harmonized:
-            for path in QueryModifier.consent_paths["harmonized"]:
+            for path in ConsentsModifier.consent_paths["harmonized"]:
                 if path in query._lstFilter.data:
                     del query._lstFilter.data[path]
         else:
@@ -41,7 +41,7 @@ class QueryModifier:
 
         variant_filters = [k for k in query._lstFilter.data.keys() if query._lstFilter.data[k]['HpdsDataType'] == 'info']
         if len(variant_filters) == 0:
-            for path in QueryModifier.consent_paths["topmed"]:
+            for path in ConsentsModifier.consent_paths["topmed"]:
                 if path in query._lstFilter.data:
                     del query._lstFilter.data[path]
         else:
