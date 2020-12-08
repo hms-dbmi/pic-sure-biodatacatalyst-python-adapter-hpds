@@ -51,7 +51,7 @@ class ResourceConnection(HpdsResourceConnection):
 
 
                 all_consents = list(set(harmonized + topmed))
-                if ["\\_consents\\"] in qt["categoryFilters"]:
+                if "\\_consents\\" in qt["categoryFilters"]:
                     all_consents = list(set(all_consents + qt["categoryFilters"]["\\_consents\\"]))
                 for key in all_consents:
                     if key in harmonized:
