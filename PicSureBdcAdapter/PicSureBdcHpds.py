@@ -1,17 +1,30 @@
 # -*- coding: utf-8 -*-
 
+import PicSureClient
 from PicSureHpdsLib.PicSureHpds import Adapter as HpdsAdapter
 from PicSureHpdsLib.PicSureHpds import HpdsResourceConnection
 from PicSureHpdsLib.PicSureHpdsQuery import Query as HpdsQuery
 from .ConsentsModifier import ConsentsModifier
+from .PicSureDictionary import PicSureDictionary
 import pandas as pd
 import json
 
 class Adapter(HpdsAdapter):
-    def __init__(self, connection):
+    def __init__(self, PICSURE_network_URL, token):
+        client = PicSureClient.Client()
+        connection = client.connect(PICSURE_network_URL, token, False)
         HpdsAdapter.__init__(self, connection)
 
-    def useResource(self, resource_uuid):
+    def useOpenPicSure(self):
+        return self.useResource("70c837be-5ffc-11eb-ae93-0242ac130002", False)
+    
+    def useAuthPicSure(self):
+        return self.useResource("02e23f52-f354-4e8b-992c-d37c8b9ba140")
+    
+    def useDictionary(self):
+        return self.useResource("36363664-6231-6134-2d38-6538652d3131")
+    
+    def useResource(self, resource_uuid, isAuth=True):
         uuid = resource_uuid
         if uuid is None and len(self.connection_reference.resource_uuids) == 1:
             uuid = self.connection_reference.resource_uuids[0]
@@ -21,12 +34,16 @@ class Adapter(HpdsAdapter):
                 raise KeyError('Please specify a UUID, there is more than 1 resource.')
 
         if uuid in self.connection_reference.resource_uuids:
-            return ResourceConnection(self.connection_reference, uuid)
+            return ResourceConnection(self.connection_reference, uuid, isAuth)
         else:
             raise KeyError('Resource UUID "'+uuid+'" was not found!')
 
 
 class ResourceConnection(HpdsResourceConnection):
+    def __init__(self, connection_reference, uuid, isAuth = True):
+        self.isAuth = isAuth
+        HpdsResourceConnection.__init__(self, connection_reference, uuid)
+        
     def list_consents(self):
         if "queryTemplate" in self._profile_info:
             if(self._profile_info["queryTemplate"] is None):
@@ -81,10 +98,16 @@ class ResourceConnection(HpdsResourceConnection):
             # If query template does not exist in profile then make an empty load query
             # Do this to to avoid null exceptions
             load_query = '{}'
-        return Query(self, load_query)
+        if self.isAuth :
+            return AuthQuery(self, load_query)
+        else :
+            return OpenQuery(self, load_query)
+
+    def dictionary(self):
+        return PicSureDictionary(self)
 
 
-class Query(HpdsQuery):
+class AuthQuery(HpdsQuery):
     def __init__(self, conn, load_query):
         super().__init__(conn, load_query)
         self._default_query_consents = ConsentsModifier.default_query_consents(self)
@@ -109,3 +132,44 @@ class Query(HpdsQuery):
     def getResultsDataFrame(self, asAsync=False, timeout=30, **kwargs):
         ConsentsModifier.modify_query(self)
         return super().getResultsDataFrame(asAsync, timeout, **kwargs)
+
+class OpenQuery(HpdsQuery):
+    def __init__(self, conn, load_query):
+        super().__init__(conn, load_query)
+        self._default_query_consents = ConsentsModifier.default_query_consents(self)
+    def help(self):
+        print("""
+        .crosscounts()  list of data fields that cross counts will be calculated for
+        .require()      list of data fields that must be present in all returned records
+        .anyof()        list of data fields that records must be a member of at least one entry
+        .studies()      list of studies that are selected that the query will run against
+        .filter()       list of data fields and conditions that returned records satisfy
+                  [ Filter keys exert an AND relationship on returned records      ]
+                  [ Categorical values have an OR relationship on their key        ]
+                  [ Numerical Ranges are inclusive of their start and end points   ]
+
+        .getCount()             single count indicating the number of matching records
+        .getCrossCounts()       array indicating number of matching records per cross-count keys
+        .getRunDetails()        details about the last run of the query
+        .show()                 lists all current query parameters
+        .save()                 returns the JSON-formatted query request as string
+        .load(query)            set query's current criteria to those in given JSON string
+        
+        """)
+
+    def save(self):
+        ConsentsModifier.modify_query(self)
+        return super().save()
+    def show(self):
+        ConsentsModifier.modify_query(self)
+        return super().show()
+    def buildQuery(self, *args):
+        ConsentsModifier.modify_query(self)
+        return super().buildQuery(*args)
+    def getCount(self, asAsync=False, timeout=30):
+        ConsentsModifier.modify_query(self)
+        return super().getCount(asAsync, timeout)
+    def getCrossCounts(self, asAsync=False):
+        ConsentsModifier.modify_query(self)
+        return super().getCrossCounts(asAsync)
+
