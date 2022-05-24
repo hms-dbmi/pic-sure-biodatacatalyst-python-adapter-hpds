@@ -8,7 +8,7 @@ class DictionaryResult:
 
     def help(self):
         print ("""
-        
+[HELP] PicSureBdcAdapter.Adapter(url, token).useDictionary().dictionary().find(term)
 .count()            %s
 
 .varInfo(HPDS_PATH) %s
@@ -18,7 +18,7 @@ class DictionaryResult:
 .dataframe()        %s
 
 .listPaths()        %s
-        
+
         """ % (
             self.count.__doc__, 
             self.varInfo.__doc__, 
@@ -26,7 +26,7 @@ class DictionaryResult:
             self.dataframe.__doc__,
             self.listPaths.__doc__
         ))
-        
+
 
     def count(self):
         return len(self.results['results']['searchResults'])
@@ -35,11 +35,14 @@ class DictionaryResult:
     Get the number of search results in this DictionaryResult object.
     """
 
+    def __conceptPath__(self, result):
+        return result['metadata']['HPDS_PATH']
+
     def varInfo(self, path):
-        
+ 
         def __resultInfoString__(result):
             result = result['result']
-            conceptPath = result['metadata']['HPDS_PATH'];
+            conceptPath = self.__conceptPath__(result)
             infoString = "<hr>" + conceptPath.replace('\\','\\\\') + '<hr>'
             for key in result:
                 element = result[key]
@@ -57,8 +60,7 @@ class DictionaryResult:
             return infoString
 
         for result in self.results['results']['searchResults']:
-            resultEntry = result['result']
-            conceptPath = resultEntry['metadata']['HPDS_PATH']
+            conceptPath = self.__conceptPath__(result['result'])
             if( path == conceptPath ):
                 display( HTML( __resultInfoString__(result) ) )
                 return 
@@ -84,7 +86,7 @@ class DictionaryResult:
     """
 
     def dataframe(self):
-                
+ 
         def __resultToColumns__(result):
             record = result['result'].copy()
             metadata = record['metadata']
@@ -109,12 +111,12 @@ class DictionaryResult:
     Extract the paths of all results into a list. This list can be added to the 
     select() or crosscounts() or anyof() lists of a query. For example:
         
-        query.select().add(dictionaryResult.listPaths()
+        query.select().add(dictionaryResult.listPaths())
         query.getResultsDataFrame(low_memory=False)
         
     That would get you a dataframe with the values for all of the variables matching your search.
     """
-        
+
     def __init__(self, results):
         self.results = results
 
@@ -132,10 +134,10 @@ class DictionaryResult:
         metadata = result['metadata']
         dataType = ("categorical" if result['is_categorical'] else "continuous")
         values = (result['values'].values() if result['is_categorical'] else ["1 - 100"])
-        conceptPath = result['metadata']['HPDS_PATH']
-        return [conceptPath, __leftAlign__(metadata['dataTableDescription']), __leftAlign__(metadata['description']), dataType, __ul__(values)]
+        conceptPath = self.__conceptPath__(result)
+        return [conceptPath, __leftAlign__(metadata['derived_group_description']), __leftAlign__(metadata['derived_var_description']), dataType, __ul__(values)]
 
     def __path__(self, result):
         return result[0]
-            
+
 
