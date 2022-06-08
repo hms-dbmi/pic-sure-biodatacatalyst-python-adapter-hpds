@@ -21,10 +21,14 @@ class PicSureDictionary:
         self._included_studies = list(map(stripSlashes, filter(r.match, self._profile_queryScopes)))
 
     def help(self):
-        print("""
-            .find()                 Lists all data dictionary entries
-            .find(search_string)    Lists matching data dictionary entries
-        """)
+        print ("""
+            [HELP] PicSureBdcAdapter.Adapter(url, token).useDictionary().dictionary()
+            %s
+            %s
+        """ % (
+            self.find.__doc__, 
+            self.genotype_annotations.__doc__, 
+        ))
 
     def genotype_annotations(self):
         query = {"query":""}
@@ -39,6 +43,8 @@ class PicSureDictionary:
         df = pd.DataFrame.from_records(vars)
         df = df.reindex(columns=['genomic_annotation', 'description', 'values', 'continuous'])
         return df
+    genotype_annotations.__doc__ = """
+    .genotype_annotations() Lists all genotypic annotations available to use as filters"""
 
     def find(self, term=None):
         if term == None:
@@ -50,4 +56,6 @@ class PicSureDictionary:
             return result['result']['studyId'].split('.')[0] in self._included_studies
         results['results']['searchResults'] = list(filter(isInScope, results['results']['searchResults']))
         return  DictionaryResult(results)
-
+    find.__doc__ = """
+    .find()                 Lists all phenotypic data dictionary entries
+    .find(search_string)    Lists all phenotypic data dictionary entries that match the search string"""
