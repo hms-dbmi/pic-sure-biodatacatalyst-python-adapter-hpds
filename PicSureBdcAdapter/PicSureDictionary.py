@@ -36,7 +36,7 @@ class PicSureDictionary:
             record['description'] = re.sub("^\"|\"$", "", record['description'].replace("Description=",""))
             record['values'] = ", ".join(record['values'])
             vars.append(record)
-        df = pd.DataFrame.from_records(list(vars))
+        df = pd.DataFrame.from_records(vars)
         df = df.reindex(columns=['genomic_annotation', 'description', 'values', 'continuous'])
         return df
 
