@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import re
+import pandas as pd
 from .DictionaryResult import DictionaryResult
 
 class PicSureDictionary:
@@ -20,10 +21,30 @@ class PicSureDictionary:
         self._included_studies = list(map(stripSlashes, filter(r.match, self._profile_queryScopes)))
 
     def help(self):
-        print("""
-            .find()                 Lists all data dictionary entries
-            .find(search_string)    Lists matching data dictionary entries
-        """)
+        print ("""
+            [HELP] PicSureBdcAdapter.Adapter(url, token).useDictionary().dictionary()
+            %s
+            %s
+        """ % (
+            self.find.__doc__, 
+            self.genotype_annotations.__doc__, 
+        ))
+
+    def genotype_annotations(self):
+        query = {"query":""}
+        results = json.loads(self._apiObj.search(self.resourceUUID, json.dumps(query)))
+        annotations = list()
+        for annotation, annotation_value in results['results']['info'].items():
+            record = annotation_value.copy()
+            record['genomic_annotation'] = annotation
+            record['description'] = re.sub("^\"|\"$", "", record['description'].replace("Description=",""))
+            record['values'] = ", ".join(record['values'])
+            annotations.append(record)
+        df = pd.DataFrame.from_records(annotations)
+        df = df.reindex(columns=['genomic_annotation', 'description', 'values', 'continuous'])
+        return df
+    genotype_annotations.__doc__ = """
+    .genotype_annotations() Lists all genotypic annotations available to use as filters"""
 
     def find(self, term=None):
         if term == None:
@@ -35,4 +56,6 @@ class PicSureDictionary:
             return result['result']['studyId'].split('.')[0] in self._included_studies
         results['results']['searchResults'] = list(filter(isInScope, results['results']['searchResults']))
         return  DictionaryResult(results)
-
+    find.__doc__ = """
+    .find()                 Lists all phenotypic data dictionary entries
+    .find(search_string)    Lists all phenotypic data dictionary entries that match the search string"""
