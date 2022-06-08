@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import re
+import pandas as pd
 from .DictionaryResult import DictionaryResult
 
 class PicSureDictionary:
@@ -24,6 +25,20 @@ class PicSureDictionary:
             .find()                 Lists all data dictionary entries
             .find(search_string)    Lists matching data dictionary entries
         """)
+
+    def genotype_annotations(self):
+        query = {"query":""}
+        results = json.loads(self._apiObj.search(self.resourceUUID, json.dumps(query)))
+        vars = list()
+        for variable, info in results['results']['info'].items():
+            record = info.copy()
+            record['genomic_annotation'] = variable
+            record['description'] = re.sub("^\"|\"$", "", record['description'].replace("Description=",""))
+            record['values'] = ", ".join(record['values'])
+            vars.append(record)
+        df = pd.DataFrame.from_records(list(vars))
+        df = df.reindex(columns=['genomic_annotation', 'description', 'values', 'continuous'])
+        return df
 
     def find(self, term=None):
         if term == None:
