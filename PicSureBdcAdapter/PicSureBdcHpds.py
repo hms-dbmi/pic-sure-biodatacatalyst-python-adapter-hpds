@@ -106,8 +106,36 @@ class ResourceConnection(HpdsResourceConnection):
     def dictionary(self):
         return PicSureDictionary(self)
 
+# Temporarily override the help text to remove mention of getApproximateVariantCount & 
+#   getVariantsDataFrame until they are ready for BDC env.
+class BaseQuery(HpdsQuery):
+    def help(self):
+        print("""
+        .select()       list of data fields to return from resource for each record
+        .crosscounts()  list of data fields that cross counts will be calculated for
+        .require()      list of data fields that must be present in all returned records
+        .anyof()        list of data fields that records must be a member of at least one entry
+        .studies()      list of studies that are selected that the query will run against
+        .filter()       list of data fields and conditions that returned records satisfy
+                  [ Filter keys exert an AND relationship on returned records      ]
+                  [ Categorical values have an OR relationship on their key        ]
+                  [ Numerical Ranges are inclusive of their start and end points   ]
+        .getCount()             single count indicating the number of matching records
+        .getCrossCounts()       array indicating number of matching records per cross-count keys
+        .getResults()           CSV-like string containing the matching records
+        .getResultsDataFrame()  pandas DataFrame containing the matching records...
+                                  Params "asAsynch" and "timeout" are used by function, any
+                                  additional named parameters are passed to pandas.read_csv()
+        .getRunDetails()        details about the last run of the query
+        .show()                 lists all current query parameters
+        .save()                 returns the JSON-formatted query request as string
+        .load(query)            set query's current criteria to those in given JSON string
+            * getCount(), getResults(), and getResultsDataFrame() functions can also
+              accept options that run queries differently which might help with
+              connection timeouts. Example: .getResults(async=True, timeout=60)
+        """)
 
-class AuthQuery(HpdsQuery):
+class AuthQuery(BaseQuery):
     def __init__(self, conn, load_query):
         super().__init__(conn, load_query)
         self._default_query_consents = ConsentsModifier.default_query_consents(self)
@@ -133,7 +161,7 @@ class AuthQuery(HpdsQuery):
         ConsentsModifier.modify_query(self)
         return super().getResultsDataFrame(asAsync, timeout, **kwargs)
 
-class OpenQuery(HpdsQuery):
+class OpenQuery(BaseQuery):
     def __init__(self, conn, load_query):
         super().__init__(conn, load_query)
         self._default_query_consents = ConsentsModifier.default_query_consents(self)
