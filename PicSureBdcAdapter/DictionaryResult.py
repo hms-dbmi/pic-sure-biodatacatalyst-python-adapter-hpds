@@ -133,7 +133,7 @@ class DictionaryResult:
         result = entry['result']
         metadata = result['metadata']
         dataType = ("categorical" if result['is_categorical'] else "continuous")
-        values = (result['values'].values() if result['is_categorical'] else ["1 - 100"])
+        values = (result['values'] if result['is_categorical'] else ["1 - 100"])
         conceptPath = self.__conceptPath__(result)
         return [conceptPath, __leftAlign__(metadata['derived_group_description']), __leftAlign__(metadata['derived_var_description']), dataType, __ul__(values)]
 
