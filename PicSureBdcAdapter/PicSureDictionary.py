@@ -32,7 +32,7 @@ class PicSureDictionary:
 
     def genotype_annotations(self):
         queryJSON = {"query":{"expectedResultType": "INFO_COLUMN_LISTING"}}
-        httpResults = self._apiObj.syncQuery(self._resourceUUID, json.dumps(queryJSON))
+        httpResults = self._apiObj.syncQuery(self.resourceUUID, json.dumps(queryJSON))
         result = json.loads(httpResults)
         return result
 
