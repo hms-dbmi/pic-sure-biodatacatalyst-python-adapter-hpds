@@ -30,12 +30,6 @@ class PicSureDictionary:
             self.genotype_annotations.__doc__, 
         ))
 
-    def genotype_annotations(self):
-        queryJSON = {"query":{"expectedResultType": "INFO_COLUMN_LISTING"}}
-        httpResults = self._apiObj.syncQuery(self.resourceUUID, json.dumps(queryJSON))
-        result = json.loads(httpResults)
-        return result
-
     def find(self, term=None):
         if term == None:
             query = {"query":{"searchTerm":"","includedTags":[],"excludedTags":[],"returnTags":"true","offset":0,"limit":10000000}}
