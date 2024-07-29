@@ -30,22 +30,6 @@ class PicSureDictionary:
             self.genotype_annotations.__doc__, 
         ))
 
-    def genotype_annotations(self):
-        query = {"query":""}
-        results = json.loads(self._apiObj.search(self.resourceUUID, json.dumps(query)))
-        annotations = list()
-        for annotation, annotation_value in results['results']['info'].items():
-            record = annotation_value.copy()
-            record['genomic_annotation'] = annotation
-            record['description'] = re.sub("^\"|\"$", "", record['description'].replace("Description=",""))
-            record['values'] = ", ".join(record['values'])
-            annotations.append(record)
-        df = pd.DataFrame.from_records(annotations)
-        df = df.reindex(columns=['genomic_annotation', 'description', 'values', 'continuous'])
-        return df
-    genotype_annotations.__doc__ = """
-    .genotype_annotations() Lists all genotypic annotations available to use as filters"""
-
     def find(self, term=None):
         if term == None:
             query = {"query":{"searchTerm":"","includedTags":[],"excludedTags":[],"returnTags":"true","offset":0,"limit":10000000}}
