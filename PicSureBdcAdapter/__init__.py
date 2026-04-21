@@ -8,7 +8,7 @@ Top-level package for PIC-SURE HPDS Python Client.
 """
 
 __author__ = """Nick Benik"""
-__email__ = 'nick_benik@hms.harvard.edu'
-__version__ = '1.0.0'
+__email__ = "nick_benik@hms.harvard.edu"
+__version__ = "1.0.0"
 
 from .PicSureBdcHpds import Adapter

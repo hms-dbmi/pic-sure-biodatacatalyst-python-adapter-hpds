@@ -2,7 +2,7 @@ class ConsentsModifier:
     harmonizedPaths = ["\\DCC Harmonized data set"]
     consent_paths = {
         "harmonized": ["\\_harmonized_consent\\"],
-        "topmed": ["\\_topmed_consents\\"]
+        "topmed": ["\\_topmed_consents\\"],
     }
     default_consents = {}
 
@@ -43,9 +43,15 @@ class ConsentsModifier:
         else:
             for path in query._default_query_consents["harmonized"]:
                 if not path in query._lstFilter.data:
-                    query._lstFilter.data[path] = query._default_query_consents["harmonized"][path]
+                    query._lstFilter.data[path] = query._default_query_consents[
+                        "harmonized"
+                    ][path]
 
-        variant_filters = [k for k in query._lstFilter.data.keys() if query._lstFilter.data[k]['HpdsDataType'] == 'info']
+        variant_filters = [
+            k
+            for k in query._lstFilter.data.keys()
+            if query._lstFilter.data[k]["HpdsDataType"] == "info"
+        ]
         if len(variant_filters) == 0:
             for path in ConsentsModifier.consent_paths["topmed"]:
                 if path in query._lstFilter.data:
@@ -53,6 +59,8 @@ class ConsentsModifier:
         else:
             for path in query._default_query_consents["topmed"]:
                 if not path in query._lstFilter.data:
-                    query._lstFilter.data[path] = query._default_query_consents["topmed"][path]
+                    query._lstFilter.data[path] = query._default_query_consents[
+                        "topmed"
+                    ][path]
 
         return query
